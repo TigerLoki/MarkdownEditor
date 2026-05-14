@@ -1,0 +1,9 @@
+﻿<RCC>
+    <qresource prefix="/app/icons">
+        <file alias="icon.png">resources/icons/icon.png</file>
+    </qresource>
+
+    <qresource prefix="/app/config">
+        <file alias="settings.json">resources/config/settings.json</file>
+    </qresource>
+</RCC>
