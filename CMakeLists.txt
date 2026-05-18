@@ -21,6 +21,8 @@ find_package(Qt6 REQUIRED COMPONENTS
         Gui
         Qml
         Quick
+        QuickControls2
+        QuickDialogs2
         Widgets
 )
 
@@ -30,12 +32,21 @@ qt_add_executable(appMarkdownEditor
         src/main.cpp
         app.rc
         resources.qrc
+        src/core/Document.cpp
+        include/core/Document.h
+        src/core/FileManager.cpp
+        include/core/FileManager.h
+        src/viewmodels/EditorViewModel.cpp
+        include/viewmodels/EditorViewModel.h
+        include/core/Token.h
 )
 
 qt_add_qml_module(appMarkdownEditor
         URI MarkdownEditor
         QML_FILES
         src/qml/Main.qml
+        src/qml/EditorView.qml
+        src/qml/PreviewView.qml
 )
 
 set_target_properties(appMarkdownEditor PROPERTIES
@@ -48,5 +59,9 @@ target_link_libraries(appMarkdownEditor PRIVATE
         Qt6::Gui
         Qt6::Qml
         Qt6::Quick
+        Qt6::QuickControls2
+        Qt6::QuickDialogs2
         Qt6::Widgets
 )
+
+include_directories(include)
