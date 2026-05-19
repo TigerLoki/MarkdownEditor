@@ -19,17 +19,17 @@ QString Document::title() const {
     if (filePath_.isEmpty()) {
         return "Untitled";
     }
-    const QFileInfo fileInfo(filePath_);
+    QFileInfo const fileInfo(filePath_);
     return fileInfo.fileName();
 }
 
-void Document::setText(const QString &text) {
+void Document::setText(QString const &text) {
     if (text == text_) return;
     text_ = text;
     isDirty_ = true;
 }
 
-void Document::markClean(const QString &savedPath) {
+void Document::markClean(QString const &savedPath) {
     filePath_ = savedPath;
     isDirty_ = false;
 }

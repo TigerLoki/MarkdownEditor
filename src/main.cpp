@@ -4,8 +4,8 @@
 #include <QQmlContext>
 
 #include "core/Document.h"
-#include "core/FileManager.h"
 #include "viewmodels/EditorViewModel.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -20,3 +20,4 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
+

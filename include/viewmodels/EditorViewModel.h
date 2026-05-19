@@ -21,17 +21,17 @@ public:
 
 public slots:
     void newFile();
-    void openFile(const QString& path);
+    void openFile(QString const &path);
     void saveFile();
-    void saveFileAs(const QString& path);
-    void exportHtml(const QString& path);
-    void setText(const QString& text);
+    void saveFileAs(QString const &path);
+    void exportHtml(QString const &path);
+    void setText(QString const &text);
 
 signals:
     void textChanged();
     void titleChanged();
     void isDirtyChanged();
-    void errorOccurred(const QString& message);
+    void errorOccurred(QString const &message);
 
 private:
     Document    document_;

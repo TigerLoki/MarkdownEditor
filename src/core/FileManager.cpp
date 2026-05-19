@@ -15,8 +15,8 @@ void FileManager::newFile() const {
     document_.reset();
 }
 
-void FileManager::openFile(const QString& path) {
-    const QString localPath = QUrl(path).toLocalFile();
+void FileManager::openFile(QString const &path) {
+    QString const localPath = QUrl(path).toLocalFile();
     QFile file(localPath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         emit errorOccurred(tr("Cannot open file %1").arg(path));
@@ -37,27 +37,26 @@ void FileManager::saveFile() {
     document_.markClean(document_.filePath());
 }
 
-void FileManager::saveFileAs(const QString& path) {
+void FileManager::saveFileAs(QString const &path) {
     doSaveFile(path, document_.text());
     document_.markClean(path);
 }
 
-void FileManager::exportHtml(const QString& path) {
+void FileManager::exportHtml(QString const &path) {
     doSaveFile(path, wrapHtml(document_.text()));
 }
 
-QString FileManager::wrapHtml(const QString& body) {
-    return QString(
-        "<!DOCTYPE html>\n"
-        "<html><head><meta charset=\"utf-8\"></head>\n"
-        "<body>\n%1\n</body></html>"
-    ).arg(body);
+QString FileManager::wrapHtml(QString const &body) {
+    return QString(u"<!DOCTYPE html>\n"
+                   "<html><head><meta charset=\"utf-8\"></head>\n"
+                   "<body>\n%1\n</body></html>")
+        .arg(body);
 }
 
-void FileManager::doSaveFile(const QString& path, const QString& string) {
-    const QString localPath = QUrl(path).toLocalFile();
-    const QFileInfo fileInfo(localPath);
-    if (const QDir dir = fileInfo.absoluteDir(); !dir.exists()) {
+void FileManager::doSaveFile(QString const &path, QString const &string) {
+    QString const localPath = QUrl(path).toLocalFile();
+    QFileInfo const fileInfo(localPath);
+    if (QDir const dir = fileInfo.absoluteDir(); !dir.exists()) {
         if (!dir.mkpath(".")) {
             emit errorOccurred(tr("Cannot create directory: %1").arg(dir.absolutePath()));
             return;

@@ -25,7 +25,7 @@ bool EditorViewModel::isDirty() const {
     return document_.isDirty();
 }
 
-void EditorViewModel::setText(const QString& text) {
+void EditorViewModel::setText(QString const &text) {
     if (text == document_.text()) return;
     document_.setText(text);
     emit textChanged();
@@ -39,7 +39,7 @@ void EditorViewModel::newFile() {
     emit isDirtyChanged();
 }
 
-void EditorViewModel::openFile(const QString& path) {
+void EditorViewModel::openFile(QString const &path) {
     fileManager_.openFile(path);
     emit textChanged();
     emit titleChanged();
@@ -52,12 +52,12 @@ void EditorViewModel::saveFile() {
     emit isDirtyChanged();
 }
 
-void EditorViewModel::saveFileAs(const QString& path) {
+void EditorViewModel::saveFileAs(QString const &path) {
     fileManager_.saveFileAs(path);
     emit titleChanged();
     emit isDirtyChanged();
 }
 
-void EditorViewModel::exportHtml(const QString& path) {
+void EditorViewModel::exportHtml(QString const &path) {
     fileManager_.exportHtml(path);
 }

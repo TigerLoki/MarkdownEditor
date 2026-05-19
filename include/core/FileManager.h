@@ -7,20 +7,20 @@ class FileManager : public QObject {
     Q_OBJECT
 
 public:
-    explicit FileManager(Document& document, QObject* parent = nullptr);
+    explicit FileManager(Document &document, QObject *parent = nullptr);
 
     void newFile() const;
-    void openFile(const QString& path);
+    void openFile(QString const &path);
     void saveFile();
-    void saveFileAs(const QString& path);
-    void exportHtml(const QString& path);
+    void saveFileAs(QString const &path);
+    void exportHtml(QString const &path);
 
 
 signals:
-        void errorOccurred(const QString& message);
+        void errorOccurred(QString const &message);
 
     private:
         Document& document_;
-        void doSaveFile(const QString& path, const QString& string);
-        static QString wrapHtml(const QString &body);
+        void doSaveFile(QString const &path, QString const &string);
+        [[nodiscard]] static QString wrapHtml(QString const &body);
 };
