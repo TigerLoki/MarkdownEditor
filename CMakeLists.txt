@@ -38,7 +38,9 @@ qt_add_executable(appMarkdownEditor
         include/core/FileManager.h
         src/viewmodels/EditorViewModel.cpp
         include/viewmodels/EditorViewModel.h
-        include/core/Token.h
+        include/parser/Token.h
+        src/parser/Lexer.cpp
+        include/parser/Lexer.h
 )
 
 qt_add_qml_module(appMarkdownEditor
