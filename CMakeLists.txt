@@ -41,6 +41,10 @@ qt_add_executable(appMarkdownEditor
         include/parser/Token.h
         src/parser/Lexer.cpp
         include/parser/Lexer.h
+        include/parser/AstNode.h
+        include/parser/BlockNodes.h
+        src/parser/Parser.cpp
+        include/parser/Parser.h
 )
 
 qt_add_qml_module(appMarkdownEditor
