@@ -15,12 +15,10 @@ public:
     void saveFileAs(QString const &path);
     void exportHtml(QString const &path);
 
-
 signals:
         void errorOccurred(QString const &message);
 
     private:
-        Document& document_;
+        Document &document_;
         void doSaveFile(QString const &path, QString const &string);
-        [[nodiscard]] static QString wrapHtml(QString const &body);
 };

@@ -1,6 +1,10 @@
 ﻿#include "viewmodels/EditorViewModel.h"
 
-EditorViewModel::EditorViewModel(QObject* parent)
+#include "parser/BlockParser.h"
+#include "parser/Lexer.h"
+#include "../../include/parser/HtmlExporter.h"
+
+EditorViewModel::EditorViewModel(QObject *parent)
     : QObject(parent)
     , document_()
     , fileManager_(document_)
@@ -17,12 +21,12 @@ QString EditorViewModel::title() const {
     return document_.title();
 }
 
-QString EditorViewModel::filePath() const {
-    return document_.filePath();
-}
-
 bool EditorViewModel::isDirty() const {
     return document_.isDirty();
+}
+
+QString EditorViewModel::filePath() const {
+    return document_.filePath();
 }
 
 void EditorViewModel::setText(QString const &text) {
@@ -59,5 +63,6 @@ void EditorViewModel::saveFileAs(QString const &path) {
 }
 
 void EditorViewModel::exportHtml(QString const &path) {
+    HtmlExporter exporter;
     fileManager_.exportHtml(path);
 }

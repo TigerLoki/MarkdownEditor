@@ -5,7 +5,9 @@
 #include <QTextStream>
 #include <QUrl>
 
-FileManager::FileManager(Document& document, QObject* parent)
+#include "parser/HtmlExporter.h"
+
+FileManager::FileManager(Document &document, QObject *parent)
     : QObject(parent)
     , document_(document)
 {
@@ -42,15 +44,9 @@ void FileManager::saveFileAs(QString const &path) {
     document_.markClean(path);
 }
 
-void FileManager::exportHtml(QString const &path) {
-    doSaveFile(path, wrapHtml(document_.text()));
-}
-
-QString FileManager::wrapHtml(QString const &body) {
-    return QString(u"<!DOCTYPE html>\n"
-                   "<html><head><meta charset=\"utf-8\"></head>\n"
-                   "<body>\n%1\n</body></html>")
-        .arg(body);
+void FileManager::exportHtml(const QString &path) {
+    HtmlExporter exporter;
+    doSaveFile(path, exporter.toHtml(document_.text()));
 }
 
 void FileManager::doSaveFile(QString const &path, QString const &string) {
