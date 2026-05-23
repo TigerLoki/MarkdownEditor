@@ -1,4 +1,4 @@
-﻿#include "include/parser/HtmlExporter.h"
+﻿#include "parser/HtmlExporter.h"
 
 #include "parser/BlockParser.h"
 #include "parser/Lexer.h"
@@ -117,7 +117,7 @@ void HtmlExporter::visitListItem(const ListItemNode &node) {
 }
 
 void HtmlExporter::visitThematicBreak() {
-    output_ += "<hr /\n>";
+    output_ += "<hr />\n";
 }
 
 
@@ -132,9 +132,9 @@ void HtmlExporter::visitBold(const BoldNode &node) {
 }
 
 void HtmlExporter::visitItalic(const ItalicNode &node) {
-    output_ += "<i>";
+    output_ += "<em>";
     visitChildren(node);
-    output_ += "</i>";
+    output_ += "</em>";
 }
 
 void HtmlExporter::visitInlineCode(const InlineCodeNode &node) {

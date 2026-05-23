@@ -1,8 +1,6 @@
 ﻿#include "viewmodels/EditorViewModel.h"
 
-#include "parser/BlockParser.h"
-#include "parser/Lexer.h"
-#include "../../include/parser/HtmlExporter.h"
+#include "parser/HtmlExporter.h"
 
 EditorViewModel::EditorViewModel(QObject *parent)
     : QObject(parent)
