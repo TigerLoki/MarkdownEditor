@@ -26,7 +26,7 @@ find_package(Qt6 REQUIRED COMPONENTS
         Widgets
 )
 
-qt_standard_project_setup(REQUIRES 6.10)
+qt_standard_project_setup(REQUIRES 6.11)
 
 qt_add_executable(appMarkdownEditor
         src/main.cpp
@@ -43,8 +43,11 @@ qt_add_executable(appMarkdownEditor
         include/parser/Lexer.h
         include/parser/AstNode.h
         include/parser/BlockNodes.h
-        src/parser/Parser.cpp
-        include/parser/Parser.h
+        include/parser/InlineNodes.h
+        src/parser/BlockParser.cpp
+        include/parser/BlockParser.h
+        src/parser/InlineParser.cpp
+        include/parser/InlineParser.h
 )
 
 qt_add_qml_module(appMarkdownEditor

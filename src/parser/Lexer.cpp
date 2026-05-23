@@ -1,7 +1,6 @@
 ﻿#include "parser/Lexer.h"
 #include <QRegularExpression>
 
-
 Lexer::Lexer(const QString &source) : lines_(source.split('\n')) {}
 
 std::vector<Token> Lexer::tokenize() {
@@ -106,7 +105,7 @@ std::optional<Token> Lexer::tryLexBlockquote(QString const &line, int const line
 }
 
 std::optional<Token> Lexer::tryLexUnorderedListItem(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"((-|\*)\h(.+)$)");
+    static QRegularExpression const re(R"(^(-|\*)\h(.+)$)");
     return tryLex(line, re, [lineNumber](auto const &match) {
         return Token(
             TokenType::UnorderedListItem,

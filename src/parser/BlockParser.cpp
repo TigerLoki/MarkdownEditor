@@ -1,11 +1,13 @@
-﻿#include "parser/Parser.h"
+﻿#include "parser/BlockParser.h"
 
 #include <QList>
+#include "parser/InlineNodes.h"
+#include "parser/InlineParser.h"
 
-Parser::Parser(const std::vector<Token> &tokens) : tokens_(tokens) {
+BlockParser::BlockParser(const std::vector<Token> &tokens) : tokens_(tokens) {
 }
 
-AstNode::Ptr Parser::parse() {
+AstNode::Ptr BlockParser::parse() {
     auto document = std::make_unique<DocumentNode>();
 
     while (!isAtEnd()) {
@@ -22,35 +24,31 @@ AstNode::Ptr Parser::parse() {
     return document;
 }
 
-Token const& Parser::current() const {
+Token const &BlockParser::current() const {
     return tokens_[pos_];
 }
 
-Token const& Parser::peek(int const offset) const {
+Token const& BlockParser::peek(int const offset) const {
     return tokens_[pos_ + offset];
 }
 
-Token Parser::advance() {
+Token BlockParser::advance() {
     if (!isAtEnd()) return tokens_[pos_++];
     return tokens_[pos_];
 }
-bool Parser::isAtEnd() const {
+bool BlockParser::isAtEnd() const {
     return pos_ == tokens_.size() || current().type == TokenType::EndOfFile;
 }
 
-bool Parser::check(TokenType const type) const {
+bool BlockParser::check(TokenType const type) const {
     return current().type == type;
 }
 
-AstNode::Children Parser::parseInlines(const QString &text) {
-    AstNode::Children result;
-    // auto textNode = std::make_unique<TextNode>();
-    // textNode->text = text;
-    // result.push_back(std::move(textNode));
-    return result;
+AstNode::Children BlockParser::parseInlines(const QString &text) {
+    return InlineParser(text).parse();
 }
 
-AstNode::Ptr Parser::parseBlock() {
+AstNode::Ptr BlockParser::parseBlock() {
     switch (current().type) {
         case TokenType::Heading:          return parseHeading();
         case TokenType::Paragraph:        return parseParagraph();
@@ -65,7 +63,7 @@ AstNode::Ptr Parser::parseBlock() {
     }
 }
 
-AstNode::Ptr Parser::parseHeading() {
+AstNode::Ptr BlockParser::parseHeading() {
     auto const token = advance();
 
     auto node = std::make_unique<HeadingNode>();
@@ -74,15 +72,34 @@ AstNode::Ptr Parser::parseHeading() {
     return node;
 }
 
-AstNode::Ptr Parser::parseParagraph() {
-    auto const token = advance();
-
+AstNode::Ptr BlockParser::parseParagraph() {
     auto node = std::make_unique<ParagraphNode>();
-    node->children = parseInlines(token.content.value_or(""));
+
+    while (!isAtEnd() && check(TokenType::Paragraph)) {
+        auto const token = advance();
+        QString const line = token.content.value_or("");
+
+        bool const hardBreak = line.endsWith("  ");
+        QString const content = hardBreak ? line.chopped(2) : line;
+        for (auto inlines = parseInlines(content); auto &child : inlines) {
+            node->children.push_back(std::move(child));
+        }
+
+        if (!isAtEnd() && check(TokenType::Paragraph)) {
+            if (hardBreak) {
+                node->children.push_back(std::make_unique<HardBreakNode>());
+            } else {
+                auto space = std::make_unique<TextNode>();
+                space->text = " ";
+                node->children.push_back(std::move(space));
+            }
+        }
+    }
+
     return node;
 }
 
-AstNode::Ptr Parser::parseCodeBlock() {
+AstNode::Ptr BlockParser::parseCodeBlock() {
     auto const token = advance();
 
     auto node = std::make_unique<CodeBlockNode>();
@@ -102,7 +119,7 @@ AstNode::Ptr Parser::parseCodeBlock() {
     return node;
 }
 
-AstNode::Ptr Parser::parseBlockquote() {
+AstNode::Ptr BlockParser::parseBlockquote() {
     auto const token = advance();
 
     auto node = std::make_unique<BlockquoteNode>();
@@ -110,7 +127,7 @@ AstNode::Ptr Parser::parseBlockquote() {
     return node;
 }
 
-AstNode::Ptr Parser::parseList() {
+AstNode::Ptr BlockParser::parseList() {
     auto node = std::make_unique<ListNode>();
     node->ordered = check(TokenType::OrderedListItem);
 
@@ -128,7 +145,7 @@ AstNode::Ptr Parser::parseList() {
     return node;
 }
 
-AstNode::Ptr Parser::parseThematicBreak() {
+AstNode::Ptr BlockParser::parseThematicBreak() {
     advance();
     return std::make_unique<ThematicBreakNode>();
 }

@@ -12,11 +12,11 @@ class EditorViewModel : public QObject {
     Q_PROPERTY(QString filePath READ filePath                NOTIFY titleChanged)
 
 public:
-    explicit EditorViewModel(QObject* parent = nullptr);
+    explicit EditorViewModel(QObject *parent = nullptr);
 
     [[nodiscard]] QString text()    const;
     [[nodiscard]] QString title()   const;
-    [[nodiscard]] bool    isDirty() const;
+    [[nodiscard]] bool isDirty() const;
     [[nodiscard]] QString filePath() const;
 
 public slots:

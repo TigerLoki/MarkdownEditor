@@ -6,7 +6,6 @@
 #include "core/Document.h"
 #include "viewmodels/EditorViewModel.h"
 
-
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
