@@ -3,6 +3,17 @@
 #include "parser/BlockParser.h"
 #include "parser/Lexer.h"
 
+static QString escapeAttr(const QString &str) {
+    QString out;
+    for (QChar c : str) {
+        if (c == '"')
+            out += "&quot;";
+        else
+            out += c;
+    }
+    return out;
+}
+
 QString HtmlExporter::toHtml(const QString &markdown) {
     output_.clear();
 
@@ -39,6 +50,8 @@ void HtmlExporter::visit(const AstNode &node) {
             visitBold(dynamic_cast<const BoldNode&>(node)); break;
         case NodeType::Italic:
             visitItalic(dynamic_cast<const ItalicNode&>(node)); break;
+        case NodeType::BoldItalic:
+            visitBoldItalic(dynamic_cast<const BoldItalicNode&>(node)); break;
         case NodeType::InlineCode:
             visitInlineCode(dynamic_cast<const InlineCodeNode&>(node)); break;
         case NodeType::Link:
@@ -90,7 +103,7 @@ void HtmlExporter::visitParagraph(const ParagraphNode &node) {
 void HtmlExporter::visitCodeBlock(const CodeBlockNode &node) {
     output_ += "<pre><code";
     if (!node.lang.isEmpty()) {
-        output_ += " class=\"language-" + node.lang + "\"";
+        output_ += " class=\"language-" + escapeAttr(node.lang) + "\"";
     }
     output_ += ">";
     escape(node.code);
@@ -120,7 +133,6 @@ void HtmlExporter::visitThematicBreak() {
     output_ += "<hr />\n";
 }
 
-
 void HtmlExporter::visitText(const TextNode &node) {
     escape(node.text);
 }
@@ -137,6 +149,12 @@ void HtmlExporter::visitItalic(const ItalicNode &node) {
     output_ += "</em>";
 }
 
+void HtmlExporter::visitBoldItalic(const BoldItalicNode &node) {
+    output_ += "<strong><em>";
+    visitChildren(node);
+    output_ += "</em></strong>";
+}
+
 void HtmlExporter::visitInlineCode(const InlineCodeNode &node) {
     output_ += "<code>";
     escape(node.code);
@@ -144,13 +162,13 @@ void HtmlExporter::visitInlineCode(const InlineCodeNode &node) {
 }
 
 void HtmlExporter::visitLink(const LinkNode &node) {
-    output_ += "<a href=\"" + node.href + "\">";
+    output_ += "<a href=\"" + escapeAttr(node.href) + "\">";
     visitChildren(node);
     output_ += "</a>";
 }
 
 void HtmlExporter::visitImage(const ImageNode &node) {
-    output_ += "<img src=\"" + node.src + "\" alt=\"" + node.alt + "\">";
+    output_ += "<img src=\"" + escapeAttr(node.src) + "\" alt=\"" + escapeAttr(node.alt) + "\">";
 }
 
 void HtmlExporter::visitHardBreak() {

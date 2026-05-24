@@ -24,6 +24,7 @@ private:
     void visitText(const TextNode &node);
     void visitBold(const BoldNode &node);
     void visitItalic(const ItalicNode &node);
+    void visitBoldItalic(const BoldItalicNode &node);
     void visitInlineCode(const InlineCodeNode &node);
     void visitLink(const LinkNode &node);
     void visitImage(const ImageNode &node);

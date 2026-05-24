@@ -4,8 +4,7 @@
 #include "parser/InlineNodes.h"
 #include "parser/InlineParser.h"
 
-BlockParser::BlockParser(const std::vector<Token> &tokens) : tokens_(tokens) {
-}
+BlockParser::BlockParser(const std::vector<Token> &tokens) : tokens_(tokens) {}
 
 AstNode::Ptr BlockParser::parse() {
     auto document = std::make_unique<DocumentNode>();
@@ -36,6 +35,7 @@ Token BlockParser::advance() {
     if (!isAtEnd()) return tokens_[pos_++];
     return tokens_[pos_];
 }
+
 bool BlockParser::isAtEnd() const {
     return pos_ == tokens_.size() || current().type == TokenType::EndOfFile;
 }
@@ -120,10 +120,17 @@ AstNode::Ptr BlockParser::parseCodeBlock() {
 }
 
 AstNode::Ptr BlockParser::parseBlockquote() {
-    auto const token = advance();
-
     auto node = std::make_unique<BlockquoteNode>();
-    node->children = parseInlines(token.content.value_or(""));
+    QStringList lines;
+
+    while (!isAtEnd() && check(TokenType::Blockquote)) {
+        auto token = advance();
+        lines.push_back(token.content.value_or(""));
+    }
+
+    if (!lines.isEmpty()) {
+        node->children = parseInlines(lines.join('\n'));
+    }
     return node;
 }
 
@@ -135,7 +142,23 @@ AstNode::Ptr BlockParser::parseList() {
                          ? TokenType::OrderedListItem
                          : TokenType::UnorderedListItem;
 
-    while (!isAtEnd() && check(itemType)) {
+    while (!isAtEnd()) {
+        if (check(TokenType::BlankLine)) {
+            size_t ahead = 1;
+            while (pos_ + ahead < tokens_.size() && tokens_[pos_ + ahead].type == TokenType::BlankLine)
+                ++ahead;
+            if (pos_ + ahead < tokens_.size() && tokens_[pos_ + ahead].type == itemType) {
+                while (check(TokenType::BlankLine))
+                    advance();
+                continue;
+            }
+
+            break;
+        }
+
+        if (!check(itemType))
+            break;
+
         auto token = advance();
         auto item  = std::make_unique<ListItemNode>();
         item->children = parseInlines(token.content.value_or(""));

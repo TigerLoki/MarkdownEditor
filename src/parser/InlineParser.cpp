@@ -1,6 +1,4 @@
-﻿#include <utility>
-
-#include "parser/InlineParser.h"
+﻿#include "parser/InlineParser.h"
 #include "parser/InlineNodes.h"
 
 InlineParser::InlineParser(QString text) : text_(std::move(text)) {}
@@ -23,6 +21,10 @@ AstNode::Children InlineParser::parseInlines(const QString &text) {
             }
         }
         if (c == '*' || c == '_') {
+            if (auto node = tryParseStrongEmphasis(text, pos)) {
+                result.push_back(std::move(node));
+                continue;
+            }
             if (auto node = tryParseStrong(text, pos)) {
                 result.push_back(std::move(node));
                 continue;
@@ -46,7 +48,13 @@ AstNode::Children InlineParser::parseInlines(const QString &text) {
         }
 
         auto textNode = std::make_unique<TextNode>();
+
+        int const oldPos = pos;
         textNode->text = collectText(text, pos);
+        if (pos == oldPos) {
+            textNode->text = text[pos];
+            ++pos;
+        }
         result.push_back(std::move(textNode));
     }
 
@@ -65,7 +73,7 @@ QString InlineParser::collectText(const QString &text, int &pos) {
                 result += next;
                 pos += 2;
                 continue;
-                }
+            }
         }
 
         if (c == '*' || c == '_' || c == '`' || c == '[' || c == '!') break;
@@ -77,13 +85,27 @@ QString InlineParser::collectText(const QString &text, int &pos) {
 
 AstNode::Ptr InlineParser::tryParseInlineCode(const QString &text, int &pos) {
     int const start = pos + 1;
-    int const end   = static_cast<int>(text.indexOf('`', start));
-
+    int const end = static_cast<int>(text.indexOf('`', start));
     if (end == -1) return nullptr;
 
     auto node = std::make_unique<InlineCodeNode>();
     node->code = text.mid(start, end - start);
     pos = end + 1;
+    return node;
+}
+
+AstNode::Ptr InlineParser::tryParseStrongEmphasis(const QString &text, int &pos) {
+    QChar const marker = text[pos];
+    if (pos + 2 >= text.size() || text[pos+1] != marker || text[pos+2] != marker) return nullptr;
+
+    int const start = pos + 3;
+    auto const closing = QString(3, marker);
+    int const end = static_cast<int>(text.indexOf(closing, start));
+    if (end == -1) return nullptr;
+
+    auto node = std::make_unique<BoldItalicNode>();
+    node->children = parseInlines(text.mid(start, end - start));
+    pos = end + 3;
     return node;
 }
 
@@ -93,8 +115,7 @@ AstNode::Ptr InlineParser::tryParseStrong(const QString &text, int &pos) {
 
     int const start = pos + 2;
     auto const closing = QString(2, marker);
-    int const end    = static_cast<int>(text.indexOf(closing, start));
-
+    int const end = static_cast<int>(text.indexOf(closing, start));
     if (end == -1) return nullptr;
 
     auto node = std::make_unique<BoldNode>();
@@ -108,8 +129,7 @@ AstNode::Ptr InlineParser::tryParseEmphasis(const QString &text, int &pos) {
     if (pos + 1 >= text.size() || text[pos+1] == marker) return nullptr;
 
     int const start = pos + 1;
-    int const end   = static_cast<int>(text.indexOf(marker, start));
-
+    int const end = static_cast<int>(text.indexOf(marker, start));
     if (end == -1) return nullptr;
 
     auto node = std::make_unique<ItalicNode>();
@@ -120,8 +140,7 @@ AstNode::Ptr InlineParser::tryParseEmphasis(const QString &text, int &pos) {
 
 AstNode::Ptr InlineParser::tryParseLink(const QString &text, int &pos) {
     int const start = pos + 1;
-    int const end   = static_cast<int>(text.indexOf(']', start));
-
+    int const end = static_cast<int>(text.indexOf(']', start));
     if (end == -1) return nullptr;
 
     int const urlStart = end + 1;
@@ -138,8 +157,7 @@ AstNode::Ptr InlineParser::tryParseLink(const QString &text, int &pos) {
 
 AstNode::Ptr InlineParser::tryParseImage(const QString &text, int &pos) {
     int const start = pos + 2;
-    int const end   = static_cast<int>(text.indexOf(']', start));
-
+    int const end = static_cast<int>(text.indexOf(']', start));
     if (end == -1) return nullptr;
 
     int const urlStart = end + 1;

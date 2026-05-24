@@ -52,7 +52,6 @@ std::optional<Token> Lexer::tryLex(QString const &line,
     return builder(match);
 }
 
-
 bool Lexer::isBlankLine(QString const &line) {
     return line.trimmed().isEmpty();
 }
@@ -94,7 +93,7 @@ std::optional<Token> Lexer::tryLexFencedCodeBlockEnd(QString const &line, int co
 }
 
 std::optional<Token> Lexer::tryLexBlockquote(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"(^>\s?(.*)$)");
+    static QRegularExpression const re(R"(^>\s*(.*)$)");
     return tryLex(line, re, [lineNumber](auto const &match) {
         return Token(
             TokenType::Blockquote,
@@ -129,8 +128,7 @@ std::optional<Token> Lexer::tryLexOrderedListItem(QString const &line, int const
 
 std::optional<Token> Lexer::tryLexThematicBreak(QString const &line, int const lineNumber) {
     static QRegularExpression const re(R"(^(\-\s*){3,}$|^(\*\s*){3,}$|^(_\s*){3,}$)");
-
-    return tryLex(line, re, [lineNumber](auto const&) {
+    return tryLex(line, re, [lineNumber](auto const &) {
         return Token(TokenType::ThematicBreak, lineNumber);
     });
 }

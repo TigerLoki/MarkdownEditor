@@ -16,6 +16,10 @@ struct ItalicNode : AstNode {
     [[nodiscard]] NodeType type() const override { return NodeType::Italic; }
 };
 
+struct BoldItalicNode : AstNode {
+    [[nodiscard]] NodeType type() const override { return NodeType::BoldItalic; }
+};
+
 struct InlineCodeNode : AstNode {
     [[nodiscard]] NodeType type() const override { return NodeType::InlineCode; }
     QString code;
