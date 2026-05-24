@@ -50,6 +50,10 @@ qt_add_executable(appMarkdownEditor
         include/parser/InlineParser.h
         src/parser/HtmlExporter.cpp
         include/parser/HtmlExporter.h
+        src/parser/renderers/MarkdownPreviewItem.cpp
+        include/parser/renderers/MarkdownPreviewItem.h
+        src/parser/renderers/MarkdownTextDocument.cpp
+        include/parser/renderers/MarkdownTextDocument.h
 )
 
 qt_add_qml_module(appMarkdownEditor

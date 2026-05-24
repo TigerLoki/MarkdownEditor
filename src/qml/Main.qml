@@ -93,6 +93,7 @@ ApplicationWindow {
             id: previewView
             Layout.fillWidth: true
             Layout.fillHeight: true
+            markdownContent: editorVM.text
         }
     }
 

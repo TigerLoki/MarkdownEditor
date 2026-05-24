@@ -1,21 +1,23 @@
 import QtQuick
 import QtQuick.Controls.Basic
+import MarkdownEditor
 
 Item {
-    property string htmlContent: ""
+    property string markdownContent: ""
 
-    TextArea {
-        id: preview
+    Flickable {
+        id: flickable
         anchors.fill: parent
-        font.family: "Courier New"
-        font.pointSize: 12
-        wrapMode: TextArea.Wrap
-        color: "#000000"
-        text: "Preview will be here"
-        enabled: false
+        contentWidth: parent.width
+        contentHeight: preview.contentHeight
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
 
-        background: Rectangle {
-            color: "#ffffff"
+        MarkdownPreview {
+            id: preview
+            width: flickable.width
+            height: Math.max(contentHeight, flickable.height)
+            markdown: markdownContent
         }
     }
 }
