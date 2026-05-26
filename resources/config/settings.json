@@ -1,5 +1,7 @@
 {
   "darkTheme": false,
+  "fontFamily": "Courier New",
+  "fontSize": 26,
   "theme": {
     "light": {
       "editorBg": "#ffffff",

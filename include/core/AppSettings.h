@@ -10,6 +10,9 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool darkTheme               READ darkTheme              WRITE setDarkTheme          NOTIFY darkThemeChanged)
     Q_PROPERTY(ThemeColors currentTheme     READ currentTheme                                       NOTIFY themeChanged)
 
+    Q_PROPERTY(QString fontFamily           READ fontFamily             WRITE setFontFamily         NOTIFY fontFamilyChanged)
+    Q_PROPERTY(int fontSize                 READ fontSize               WRITE setFontSize           NOTIFY fontSizeChanged)
+
     Q_PROPERTY(QColor editorBg              READ editorBg                                           NOTIFY themeChanged)
     Q_PROPERTY(QColor editorText            READ editorText                                         NOTIFY themeChanged)
     Q_PROPERTY(QColor editorSelection       READ editorSelection                                    NOTIFY themeChanged)
@@ -27,8 +30,12 @@ public:
 
     [[nodiscard]] bool darkTheme() const;
     void setDarkTheme(bool dark);
-
     [[nodiscard]] ThemeColors currentTheme() const;
+
+    [[nodiscard]] QString fontFamily() const;
+    void setFontFamily(const QString &family);
+    [[nodiscard]] int fontSize() const;
+    void setFontSize(int size);
 
     [[nodiscard]] QColor editorBg() const;
     [[nodiscard]] QColor editorText() const;
@@ -44,18 +51,31 @@ public:
 
     void applyPalette() const;
 
+public slots:
+    void increaseFontSize();
+    void decreaseFontSize();
+
 signals:
     void darkThemeChanged();
     void themeChanged();
 
+    void fontFamilyChanged();
+    void fontSizeChanged();
+
+    void errorOccurred(QString const &message);
+
 private:
     void load();
-    void save() const;
+    void save();
     void applyTheme();
+
+    QString settingsPath_;
 
     bool darkThemeFlag_ = false;
     ThemeColors currentTheme_;
+    QString fontFamily_ = "Courier New";
+    int fontSize_ = 16;
+
     ThemeColors lightThemeColors_;
     ThemeColors darkThemeColors_;
-    QString settingsPath_;
 };

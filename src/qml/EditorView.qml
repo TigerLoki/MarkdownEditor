@@ -10,19 +10,21 @@ Rectangle {
     property alias text: textArea.text
     property alias editor: textArea
 
-    function format(prefix, suffix) {
-        editorVM.applyFormatting(textArea.selectionStart, textArea.selectionEnd, prefix, suffix)
-    }
-
-    function linePrefix(prefix) {
-        editorVM.applyLinePrefix(textArea.cursorPosition, prefix)
-    }
-
     Connections {
         target: editorVM
         function onCursorPositionChanged(newPos) {
             textArea.cursorPosition = newPos
             textArea.forceActiveFocus()
+        }
+    }
+
+    Connections {
+        target: appSettings
+        function onFontSizeChanged() {
+            lineNumberModel.rebuild()
+        }
+        function onFontFamilyChanged() {
+            lineNumberModel.rebuild()
         }
     }
 
@@ -67,8 +69,8 @@ Rectangle {
             id: textArea
             width: parent.width - 44
             height: parent.height
-            font.family: "Courier New"
-            font.pixelSize: 16
+            font.family: appSettings.fontFamily
+            font.pixelSize: appSettings.fontSize
             renderType: Text.NativeRendering
             wrapMode: TextArea.Wrap
             color: appSettings.editorText
@@ -93,18 +95,32 @@ Rectangle {
     ListModel {
         id: lineNumberModel
         property int lastLineCount: 0
+        property int lastFontSize: 0
 
         function rebuild() {
             if (!textArea) return
+
+            measuringText.font = textArea.font
+            measuringText.width = textArea.width - textArea.leftPadding - textArea.rightPadding
+
             var lines = textArea.text.split('\n')
             var newLineCount = lines.length
-            if (newLineCount === lastLineCount && width === lastWidth) return
+            var fontSizeChanged = (appSettings.fontSize !== lastFontSize)
+            var widthChanged = (width !== lastWidth)
+
+            if (!fontSizeChanged && !widthChanged && newLineCount === lastLineCount) return
+
             lastLineCount = newLineCount
             lastWidth = width
+            lastFontSize = appSettings.fontSize
+
             clear()
             for (var i = 0; i < lines.length; ++i) {
                 measuringText.text = lines[i]
-                append({ number: i + 1, lineHeight: measuringText.implicitHeight })
+                measuringText.implicitHeight
+                var lineHeight = measuringText.implicitHeight
+                if (lineHeight <= 0) lineHeight = textArea.font.pixelSize * 1.2
+                append({ number: i + 1, lineHeight: lineHeight })
             }
         }
         property real lastWidth: 0

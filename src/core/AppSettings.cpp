@@ -70,6 +70,29 @@ ThemeColors AppSettings::currentTheme() const {
     return currentTheme_;
 }
 
+QString AppSettings::fontFamily() const {
+    return fontFamily_;
+}
+
+void AppSettings::setFontFamily(const QString &family) {
+    if (fontFamily_ == family) return;
+    fontFamily_ = family;
+    save();
+    emit fontFamilyChanged();
+}
+
+int AppSettings::fontSize() const {
+    return fontSize_;
+}
+
+void AppSettings::setFontSize(int size) {
+    size = qBound(12, size, 32);
+    if (fontSize_ == size) return;
+    fontSize_ = size;
+    save();
+    emit fontSizeChanged();
+}
+
 QColor AppSettings::editorBg() const { return currentTheme_.editorBg; }
 QColor AppSettings::editorText() const { return currentTheme_.editorText; }
 QColor AppSettings::editorSelection() const { return currentTheme_.editorSelection; }
@@ -96,56 +119,77 @@ void AppSettings::applyPalette() const {
     pal.setColor(QPalette::HighlightedText, currentTheme_.editorSelectionText);
 }
 
+void AppSettings::increaseFontSize() {
+    int newSize = fontSize_ + 2;
+    if (newSize > 32) newSize = 32;
+    setFontSize(newSize);
+}
+
+void AppSettings::decreaseFontSize() {
+    int newSize = fontSize_ - 2;
+    if (newSize < 12) newSize = 12;
+    setFontSize(newSize);
+}
+
 void AppSettings::load() {
-    QFile file(settingsPath_);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "Cannot open settings file:" << settingsPath_;
+    QFile templateFile(":/app/config/settings.json");
+    if (!templateFile.open(QIODevice::ReadOnly)) {
         return;
     }
+    QJsonDocument const templateDoc = QJsonDocument::fromJson(templateFile.readAll());
+    templateFile.close();
+    if (!templateDoc.isObject()) return;
+    QJsonObject const templateObj = templateDoc.object();
 
-    QJsonDocument const doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-
-    if (!doc.isObject()) return;
-    QJsonObject obj = doc.object();
-
-    QFile templateFile(":/app/config/settings.json");
-    bool merged = false;
-    if (templateFile.open(QIODevice::ReadOnly)) {
-        QJsonDocument const templateDoc = QJsonDocument::fromJson(templateFile.readAll());
-        templateFile.close();
-        if (templateDoc.isObject()) {
-            QJsonObject const templateObj = templateDoc.object();
-            mergeJsonObjects(obj, templateObj);
-            merged = true;
+    QJsonObject userObj;
+    if (QFile file(settingsPath_); file.open(QIODevice::ReadOnly)) {
+        QJsonDocument const userDoc = QJsonDocument::fromJson(file.readAll());
+        file.close();
+        if (userDoc.isObject()) {
+            userObj = userDoc.object();
         }
     }
 
-    if (merged) {
-        if (QFile outFile(settingsPath_); outFile.open(QIODevice::WriteOnly)) {
-            outFile.write(QJsonDocument(obj).toJson());
-            outFile.close();
-        }
+    mergeJsonObjects(userObj, templateObj);
+
+    if (QFile outFile(settingsPath_); outFile.open(QIODevice::WriteOnly)) {
+        outFile.write(QJsonDocument(userObj).toJson());
+        outFile.close();
     }
 
-    darkThemeFlag_ = obj.value("darkTheme").toBool(false);
-    QJsonObject const themeObj = obj.value("theme").toObject();
+    darkThemeFlag_ = userObj.value("darkTheme").toBool(false);
+    fontFamily_ = userObj.value("fontFamily").toString("Courier New");
+    fontSize_ = userObj.value("fontSize").toInt(16);
+
+    QJsonObject const themeObj = userObj.value("theme").toObject();
     lightThemeColors_ = loadThemeFromJson(themeObj.value("light").toObject());
     darkThemeColors_  = loadThemeFromJson(themeObj.value("dark").toObject());
 }
 
-void AppSettings::save() const {
+void AppSettings::save() {
     if (!QDir().mkpath(QFileInfo(settingsPath_).absolutePath())) {
+        emit errorOccurred(tr("Cannot create directory: %1").arg(settingsPath_));
         return;
     }
 
-    QFile file(settingsPath_);
-    if (!file.open(QIODevice::WriteOnly)) return;
-
     QJsonObject obj;
+    QFile file(settingsPath_);
+    if (file.open(QIODevice::ReadOnly)) {
+        QJsonDocument const doc = QJsonDocument::fromJson(file.readAll());
+        file.close();
+        if (doc.isObject()) {
+            obj = doc.object();
+        }
+    }
+
     obj["darkTheme"] = darkThemeFlag_;
-    file.write(QJsonDocument(obj).toJson());
-    file.close();
+    obj["fontFamily"] = fontFamily_;
+    obj["fontSize"] = fontSize_;
+
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(obj).toJson());
+        file.close();
+    }
 }
 
 void AppSettings::applyTheme() {

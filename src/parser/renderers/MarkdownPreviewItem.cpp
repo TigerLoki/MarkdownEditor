@@ -10,6 +10,8 @@
 
 MarkdownPreviewItem::MarkdownPreviewItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
+    , fontFamily_("Courier New")
+    , fontSize_(16)
 {
     setRenderTarget(QQuickPaintedItem::FramebufferObject);
 
@@ -73,13 +75,37 @@ void MarkdownPreviewItem::setTheme(const ThemeColors &theme) {
     emit themeChanged();
     update();
 }
+QString MarkdownPreviewItem::fontFamily() const {
+    return fontFamily_;
+}
+
+void MarkdownPreviewItem::setFontFamily(const QString &family) {
+    if (fontFamily_ == family) return;
+    fontFamily_ = family;
+    emit fontFamilyChanged();
+    updateDocument();
+}
+
+int MarkdownPreviewItem::fontSize() const {
+    return fontSize_;
+}
+
+void MarkdownPreviewItem::setFontSize(const int size) {
+    if (fontSize_ == size) return;
+    fontSize_ = size;
+    emit fontSizeChanged();
+    updateDocument();
+}
 
 void MarkdownPreviewItem::updateDocument() {
     HtmlExporter exporter;
     QString html = exporter.toHtml(markdown_);
-    html = "<html><body style=\"font-family:'Courier New',monospace;font-size:16px;\">"
-           "<style>img { max-width: 100%; height: auto; }</style>"
-           + html + "</body></html>";
+    html = QString("<html><body style=\"font-family:'%1',monospace;font-size:%2px;\">"
+           "<style>img { max-width: 100%%; height: auto; }</style>"
+           "%3</body></html>")
+           .arg(fontFamily_)
+           .arg(fontSize_)
+           .arg(html);
     document_->setHtml(html);
     updateContentSize();
     update();

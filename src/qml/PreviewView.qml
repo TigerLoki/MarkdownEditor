@@ -24,6 +24,8 @@ Item {
                 height: Math.max(contentHeight, flickable.height)
                 markdown: editorVM.text
                 theme: appSettings.currentTheme
+                fontFamily: appSettings.fontFamily
+                fontSize: appSettings.fontSize
             }
         }
     }

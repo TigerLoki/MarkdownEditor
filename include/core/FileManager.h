@@ -16,7 +16,7 @@ public:
     void exportHtml(QString const &path);
 
 signals:
-        void errorOccurred(QString const &message);
+    void errorOccurred(QString const &message);
 
     private:
         Document &document_;

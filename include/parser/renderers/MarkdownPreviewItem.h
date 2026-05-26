@@ -11,6 +11,8 @@ class MarkdownPreviewItem : public QQuickPaintedItem {
     Q_PROPERTY(qreal contentHeight      READ contentHeight                                  NOTIFY contentHeightChanged)
 
     Q_PROPERTY(ThemeColors theme        READ theme              WRITE setTheme              NOTIFY themeChanged)
+    Q_PROPERTY(QString fontFamily       READ fontFamily         WRITE setFontFamily         NOTIFY fontFamilyChanged)
+    Q_PROPERTY(int fontSize             READ fontSize           WRITE setFontSize           NOTIFY fontSizeChanged)
 
 public:
     explicit MarkdownPreviewItem(QQuickItem *parent = nullptr);
@@ -23,10 +25,17 @@ public:
     [[nodiscard]] ThemeColors theme() const;
     void setTheme(const ThemeColors &theme);
 
+    [[nodiscard]] QString fontFamily() const;
+    void setFontFamily(const QString &family);
+    [[nodiscard]] int fontSize() const;
+    void setFontSize(int size);
+
 signals:
     void markdownChanged();
     void contentHeightChanged();
     void themeChanged();
+    void fontFamilyChanged();
+    void fontSizeChanged();
 
 protected:
     void paint(QPainter *painter) override;
@@ -45,4 +54,6 @@ private:
     qreal contentHeight_{0};
     QTimer* updateTimer_;
     ThemeColors theme_;
+    QString fontFamily_;
+    int fontSize_;
 };

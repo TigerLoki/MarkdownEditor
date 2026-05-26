@@ -18,6 +18,15 @@ ApplicationWindow {
         }
     }
 
+    Shortcut {
+        sequences: ["Alt+Shift++", "Alt+Shift+="]
+        onActivated: appSettings.increaseFontSize()
+    }
+    Shortcut {
+        sequence: "Alt+Shift+-"
+        onActivated: appSettings.decreaseFontSize()
+    }
+
     palette: Palette {
         text: appSettings.editorText
         base: appSettings.editorBg
@@ -28,6 +37,9 @@ ApplicationWindow {
         window: appSettings.editorBg
         windowText: appSettings.editorText
     }
+
+    font.family: appSettings.fontFamily
+    font.pixelSize: appSettings.fontSize
     
     FileDialog {
         id: openDialog
@@ -116,30 +128,70 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
             ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
                 focusPolicy: Qt.NoFocus
-                text: "📄 New"
+                text: "📄"
                 onClicked: editorVM.newFile()
             }
             ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
                 focusPolicy: Qt.NoFocus
-                text: "📂 Open"
+                text: "📂"
                 onClicked: openDialog.open()
             }
             ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
                 focusPolicy: Qt.NoFocus
-                text: "💾 Save"
+                text: "💾"
                 onClicked: editorVM.saveFile()
             }
             ToolSeparator { }
-            ToolButton {focusPolicy: Qt.NoFocus; text: "B"; font.bold: true; onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "**", "**") }
-            ToolButton {focusPolicy: Qt.NoFocus; text: "I"; font.italic: true; onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "*", "*") }
-            ToolButton {focusPolicy: Qt.NoFocus; text: "`"; onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "`", "`") }
-            ToolButton {focusPolicy: Qt.NoFocus; text: "🔗"; onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "[", "](url)") }
-            ToolButton {focusPolicy: Qt.NoFocus; text: "🖼️"; onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "![", "](url)") }
+            ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
+                focusPolicy: Qt.NoFocus
+                text: "B"
+                font.bold: true
+                onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "**", "**")
+            }
+            ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
+                focusPolicy: Qt.NoFocus
+                text: "I"
+                font.italic: true
+                onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "*", "*")
+            }
+            ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
+                focusPolicy: Qt.NoFocus
+                text: "`"
+                onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "`", "`")
+            }
+            ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
+                focusPolicy: Qt.NoFocus
+                text: "🔗"
+                onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "[", "](url)")
+            }
+            ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
+                focusPolicy: Qt.NoFocus
+                text: "🖼️"
+                onClicked: editorVM.applyFormatting(editorView.editor.selectionStart, editorView.editor.selectionEnd, "![", "](url)")
+            }
             Item { Layout.fillWidth: true }
             ToolButton {
+                implicitWidth: appSettings.fontSize * 1.2 + 20
+                implicitHeight: appSettings.fontSize * 1.2 + 20
                 focusPolicy: Qt.NoFocus
-                text: appSettings.darkTheme ? "☀️ Light" : "🌙 Dark"
+                text: appSettings.darkTheme ? "☀️" : "🌙"
                 onClicked: appSettings.darkTheme = !appSettings.darkTheme
             }
         }
@@ -173,7 +225,7 @@ ApplicationWindow {
 
     Rectangle {
         id: statusBar
-        height: 24
+        height: appSettings.fontSize * 1.2 + 8
         color: appSettings.editorBorder
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -184,6 +236,8 @@ ApplicationWindow {
             Text {
                 text: editorVM.title + (editorVM.isDirty ? " [modified]" : "")
                 color: appSettings.editorText
+                font.family: appSettings.fontFamily
+                font.pixelSize: appSettings.fontSize
             }
             Item { Layout.fillWidth: true }
             Text {
@@ -203,6 +257,8 @@ ApplicationWindow {
                     return "Line: " + (line + 1) + ", Col: " + (col + 1);
                 }
                 color: appSettings.editorText
+                font.family: appSettings.fontFamily
+                font.pixelSize: appSettings.fontSize
             }
         }
     }
@@ -268,10 +324,20 @@ ApplicationWindow {
 
     Dialog {
         id: errorDialog
+        modal: true
+        closePolicy: Popup.NoAutoClose
         title: "Error"
+        width: 300
+        height: 120
+        x: (root.width - width) / 2
+        y: (root.height - height) / 2
         standardButtons: Dialog.Ok
         property string text: ""
-        Label { text: errorDialog.text }
+        Label {
+            text: errorDialog.text
+            wrapMode: Text.WordWrap
+            width: parent.width - 40
+        }
     }
 
     Connections {
