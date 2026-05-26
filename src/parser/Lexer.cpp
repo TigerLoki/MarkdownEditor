@@ -57,7 +57,7 @@ bool Lexer::isBlankLine(QString const &line) {
 }
 
 std::optional<Token> Lexer::tryLexHeading(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"(^(#{1,6})\s(.*)$)");
+    static QRegularExpression const re(R"(^\s{0,3}(#{1,6})\s(.*)$)");
     return tryLex(line, re, [lineNumber](auto const &match) {
         return Token(
             TokenType::Heading,
@@ -69,20 +69,21 @@ std::optional<Token> Lexer::tryLexHeading(QString const &line, int const lineNum
 }
 
 std::optional<Token> Lexer::tryLexFencedCodeBlockStart(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"(^`{3}(.*))");
+    static QRegularExpression const re(R"(^\s{0,3}(`{3})(.*)$)");
     return tryLex(line, re, [this, lineNumber](auto const &match) {
         inCodeBlock_ = true;
+        QString const lang = match.captured(2).trimmed();
         return Token(
             TokenType::FencedCodeBlockStart,
             lineNumber,
             std::nullopt,
-            CodeBlockData(match.captured(1))
-            );
+            CodeBlockData(lang)
+        );
     });
 }
 
 std::optional<Token> Lexer::tryLexFencedCodeBlockEnd(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"(^`{3}\s*$)");
+    static QRegularExpression const re(R"(^\s{0,3}`{3}\s*$)");
     return tryLex(line, re, [this, lineNumber](auto const &) {
         inCodeBlock_ = false;
         return Token(
@@ -93,7 +94,7 @@ std::optional<Token> Lexer::tryLexFencedCodeBlockEnd(QString const &line, int co
 }
 
 std::optional<Token> Lexer::tryLexBlockquote(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"(^>\s*(.*)$)");
+    static QRegularExpression const re(R"(^\s{0,3}>\s*(.*)$)");
     return tryLex(line, re, [lineNumber](auto const &match) {
         return Token(
             TokenType::Blockquote,
@@ -104,7 +105,7 @@ std::optional<Token> Lexer::tryLexBlockquote(QString const &line, int const line
 }
 
 std::optional<Token> Lexer::tryLexUnorderedListItem(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"(^(-|\*)\h(.+)$)");
+    static QRegularExpression const re(R"(^\s{0,3}(-|\*)\h+(.+)$)");
     return tryLex(line, re, [lineNumber](auto const &match) {
         return Token(
             TokenType::UnorderedListItem,
@@ -115,7 +116,7 @@ std::optional<Token> Lexer::tryLexUnorderedListItem(QString const &line, int con
 }
 
 std::optional<Token> Lexer::tryLexOrderedListItem(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"((\d+)\.\h(.+)$)");
+    static QRegularExpression const re(R"(^\s{0,3}(\d+)\.\h+(.+)$)");
     return tryLex(line, re, [lineNumber](auto const &match) {
         return Token(
             TokenType::OrderedListItem,
@@ -127,7 +128,7 @@ std::optional<Token> Lexer::tryLexOrderedListItem(QString const &line, int const
 }
 
 std::optional<Token> Lexer::tryLexThematicBreak(QString const &line, int const lineNumber) {
-    static QRegularExpression const re(R"(^(\-\s*){3,}$|^(\*\s*){3,}$|^(_\s*){3,}$)");
+    static QRegularExpression const re(R"(^\s{0,3}((\-\s*){3,}|(\*\s*){3,}|(_\s*){3,})$)");
     return tryLex(line, re, [lineNumber](auto const &) {
         return Token(TokenType::ThematicBreak, lineNumber);
     });

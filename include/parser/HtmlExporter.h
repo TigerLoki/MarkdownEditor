@@ -30,7 +30,6 @@ private:
     void visitImage(const ImageNode &node);
     void visitHardBreak();
     void visitChildren(const AstNode &node);
-    void escape(const QString &text);
 
     QString output_;
 };

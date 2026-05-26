@@ -92,15 +92,22 @@ Rectangle {
 
     ListModel {
         id: lineNumberModel
+        property int lastLineCount: 0
+
         function rebuild() {
             if (!textArea) return
-            clear()
             var lines = textArea.text.split('\n')
+            var newLineCount = lines.length
+            if (newLineCount === lastLineCount && width === lastWidth) return
+            lastLineCount = newLineCount
+            lastWidth = width
+            clear()
             for (var i = 0; i < lines.length; ++i) {
                 measuringText.text = lines[i]
                 append({ number: i + 1, lineHeight: measuringText.implicitHeight })
             }
         }
+        property real lastWidth: 0
     }
 
     Text {

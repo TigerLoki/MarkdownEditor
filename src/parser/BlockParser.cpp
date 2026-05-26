@@ -136,10 +136,13 @@ AstNode::Ptr BlockParser::parseBlockquote() {
 AstNode::Ptr BlockParser::parseList() {
     auto node = std::make_unique<ListNode>();
     node->ordered = check(TokenType::OrderedListItem);
+    node->start = 1;
 
     TokenType const itemType = node->ordered
                          ? TokenType::OrderedListItem
                          : TokenType::UnorderedListItem;
+
+    bool firstItem = true;
 
     while (!isAtEnd()) {
         if (check(TokenType::BlankLine)) {
@@ -151,7 +154,6 @@ AstNode::Ptr BlockParser::parseList() {
                     advance();
                 continue;
             }
-
             break;
         }
 
@@ -159,6 +161,13 @@ AstNode::Ptr BlockParser::parseList() {
             break;
 
         auto token = advance();
+        if (firstItem && node->ordered) {
+            if (auto const data = std::get_if<OrderedData>(&token.data)) {
+                node->start = data->number;
+            }
+            firstItem = false;
+        }
+
         auto item  = std::make_unique<ListItemNode>();
         item->children = parseInlines(token.content.value_or(""));
         node->children.push_back(std::move(item));

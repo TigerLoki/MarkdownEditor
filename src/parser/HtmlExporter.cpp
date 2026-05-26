@@ -3,13 +3,18 @@
 #include "parser/BlockParser.h"
 #include "parser/Lexer.h"
 
-static QString escapeAttr(const QString &str) {
+static QString escapeHtml(const QString &str, bool const forAttribute = false) {
     QString out;
+    out.reserve(str.size() * 2);
     for (QChar c : str) {
-        if (c == '"')
-            out += "&quot;";
-        else
-            out += c;
+        switch (c.unicode()) {
+            case '&':  out += "&amp;";  break;
+            case '<':  out += "&lt;";   break;
+            case '>':  out += "&gt;";   break;
+            case '"':  out += forAttribute ? "&quot;" : "\""; break;
+            case '\'': out += forAttribute ? "&#39;"  : "'";  break;
+            default:   out += c;        break;
+        }
     }
     return out;
 }
@@ -70,19 +75,6 @@ void HtmlExporter::visitChildren(const AstNode &node) {
     }
 }
 
-void HtmlExporter::escape(const QString &text) {
-    for (QChar c : text) {
-        switch (c.unicode()) {
-            case '&':  output_ += "&amp;";  break;
-            case '<':  output_ += "&lt;";   break;
-            case '>':  output_ += "&gt;";   break;
-            case '"':  output_ += "&quot;"; break;
-            case '\'': output_ += "&#39;";  break;
-            default:   output_ += c;        break;
-        }
-    }
-}
-
 void HtmlExporter::visitDocument(const DocumentNode &node) {
     visitChildren(node);
 }
@@ -103,10 +95,10 @@ void HtmlExporter::visitParagraph(const ParagraphNode &node) {
 void HtmlExporter::visitCodeBlock(const CodeBlockNode &node) {
     output_ += "<pre><code";
     if (!node.lang.isEmpty()) {
-        output_ += " class=\"language-" + escapeAttr(node.lang) + "\"";
+        output_ += " class=\"language-" + escapeHtml(node.lang, true) + "\"";
     }
     output_ += ">";
-    escape(node.code);
+    output_ += escapeHtml(node.code, false);
     output_ += "</code></pre>\n";
 }
 
@@ -118,7 +110,11 @@ void HtmlExporter::visitBlockquote(const BlockquoteNode &node) {
 
 void HtmlExporter::visitList(const ListNode &node) {
     QString const tag = node.ordered ? "ol" : "ul";
-    output_ += "<" + tag + ">\n";
+    output_ += "<" + tag;
+    if (node.ordered && node.start != 1) {
+        output_ += " start=\"" + QString::number(node.start) + "\"";
+    }
+    output_ += ">\n";
     visitChildren(node);
     output_ += "</" + tag + ">\n";
 }
@@ -134,20 +130,7 @@ void HtmlExporter::visitThematicBreak() {
 }
 
 void HtmlExporter::visitText(const TextNode &node) {
-    QString text = node.text;
-
-    QString escaped;
-    for (QChar c : text) {
-        switch (c.unicode()) {
-            case '&':  escaped += "&amp;";  break;
-            case '<':  escaped += "&lt;";   break;
-            case '>':  escaped += "&gt;";   break;
-            case '"':  escaped += "&quot;"; break;
-            case '\'': escaped += "&#39;";  break;
-            default:   escaped += c;        break;
-        }
-    }
-
+    QString escaped = escapeHtml(node.text, false);
     escaped.replace("\n", "<br>");
     output_ += escaped;
 }
@@ -172,18 +155,19 @@ void HtmlExporter::visitBoldItalic(const BoldItalicNode &node) {
 
 void HtmlExporter::visitInlineCode(const InlineCodeNode &node) {
     output_ += "<code>";
-    escape(node.code);
+    output_ += escapeHtml(node.code, false);
     output_ += "</code>";
 }
 
 void HtmlExporter::visitLink(const LinkNode &node) {
-    output_ += "<a href=\"" + escapeAttr(node.href) + "\">";
+    output_ += "<a href=\"" + escapeHtml(node.href, true) + "\">";
     visitChildren(node);
     output_ += "</a>";
 }
 
 void HtmlExporter::visitImage(const ImageNode &node) {
-    output_ += "<img src=\"" + escapeAttr(node.src) + "\" alt=\"" + escapeAttr(node.alt) + "\">";
+    output_ += "<img src=\"" + escapeHtml(node.src, true) +
+               "\" alt=\"" + escapeHtml(node.alt, true) + "\">";
 }
 
 void HtmlExporter::visitHardBreak() {
