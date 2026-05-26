@@ -134,7 +134,22 @@ void HtmlExporter::visitThematicBreak() {
 }
 
 void HtmlExporter::visitText(const TextNode &node) {
-    escape(node.text);
+    QString text = node.text;
+
+    QString escaped;
+    for (QChar c : text) {
+        switch (c.unicode()) {
+            case '&':  escaped += "&amp;";  break;
+            case '<':  escaped += "&lt;";   break;
+            case '>':  escaped += "&gt;";   break;
+            case '"':  escaped += "&quot;"; break;
+            case '\'': escaped += "&#39;";  break;
+            default:   escaped += c;        break;
+        }
+    }
+
+    escaped.replace("\n", "<br>");
+    output_ += escaped;
 }
 
 void HtmlExporter::visitBold(const BoldNode &node) {

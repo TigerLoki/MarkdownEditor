@@ -75,27 +75,26 @@ AstNode::Ptr BlockParser::parseHeading() {
 AstNode::Ptr BlockParser::parseParagraph() {
     auto node = std::make_unique<ParagraphNode>();
 
+    QStringList lines;
     while (!isAtEnd() && check(TokenType::Paragraph)) {
-        auto const token = advance();
-        QString const line = token.content.value_or("");
+        QString line = advance().content.value_or("");
+        lines.append(line);
+    }
 
-        bool const hardBreak = line.endsWith("  ");
-        QString const content = hardBreak ? line.chopped(2) : line;
-        for (auto inlines = parseInlines(content); auto &child : inlines) {
-            node->children.push_back(std::move(child));
-        }
-
-        if (!isAtEnd() && check(TokenType::Paragraph)) {
-            if (hardBreak) {
-                node->children.push_back(std::make_unique<HardBreakNode>());
+    QString fullText;
+    for (int i = 0; i < lines.size(); ++i) {
+        fullText += lines[i];
+        if (i != lines.size() - 1) {
+            if (lines[i].endsWith("  ")) {
+                fullText.chop(2);
+                fullText += '\n';
             } else {
-                auto space = std::make_unique<TextNode>();
-                space->text = " ";
-                node->children.push_back(std::move(space));
+                fullText += ' ';
             }
         }
     }
 
+    node->children = parseInlines(fullText);
     return node;
 }
 
