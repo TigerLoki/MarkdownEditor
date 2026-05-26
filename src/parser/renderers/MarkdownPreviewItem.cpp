@@ -6,14 +6,19 @@
 #include <QAbstractTextDocumentLayout>
 #include <QPalette>
 #include <limits>
+#include <QTimer>
 
 MarkdownPreviewItem::MarkdownPreviewItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
 {
     setRenderTarget(QQuickPaintedItem::FramebufferObject);
-    setOpaquePainting(true);
 
     document_ = new MarkdownTextDocument(this);
+
+    updateTimer_ = new QTimer(this);
+    updateTimer_->setSingleShot(true);
+    updateTimer_->setInterval(50);
+    connect(updateTimer_, &QTimer::timeout, this, &MarkdownPreviewItem::performUpdate);
 
     connect(document_, &MarkdownTextDocument::resourceLoaded,
             this, [this]() {
@@ -42,18 +47,37 @@ QString MarkdownPreviewItem::markdown() const {
 void MarkdownPreviewItem::setMarkdown(const QString &markdown) {
     if (markdown_ == markdown) return;
     markdown_ = markdown;
-    updateDocument();
     emit markdownChanged();
+    scheduleUpdate();
 }
 
 qreal MarkdownPreviewItem::contentHeight() const {
     return contentHeight_;
 }
 
+ThemeColors MarkdownPreviewItem::theme() const {
+    return theme_;
+}
+
+void MarkdownPreviewItem::scheduleUpdate() const {
+    updateTimer_->start();
+}
+
+void MarkdownPreviewItem::performUpdate() {
+    updateDocument();
+}
+
+void MarkdownPreviewItem::setTheme(const ThemeColors &theme) {
+    if (theme_ == theme) return;
+    theme_ = theme;
+    emit themeChanged();
+    update();
+}
+
 void MarkdownPreviewItem::updateDocument() {
     HtmlExporter exporter;
     QString html = exporter.toHtml(markdown_);
-    html = "<html><body style=\"color: black; background: white;\">"
+    html = "<html><body style=\"font-family:'Courier New',monospace;font-size:16px;\">"
            "<style>img { max-width: 100%; height: auto; }</style>"
            + html + "</body></html>";
     document_->setHtml(html);
@@ -80,13 +104,20 @@ void MarkdownPreviewItem::updateContentSize() {
 
 void MarkdownPreviewItem::paint(QPainter *painter) {
     if (width() <= 0) return;
+    painter->setRenderHint(QPainter::Antialiasing);
 
     QRectF const fullRect(0, 0, width(), height());
-    painter->fillRect(fullRect, Qt::white);
+    painter->fillRect(fullRect, theme_.previewBg);
+
+    QRectF const docRect(0, 0, width(), qMax(static_cast<qreal>(contentHeight_), height()));
+    painter->setBrush(theme_.previewBg);
+    painter->setPen(theme_.previewBorder);
+    painter->drawRoundedRect(docRect, 4, 4);
 
     if (contentHeight_ > 0) {
         QAbstractTextDocumentLayout::PaintContext ctx;
-        ctx.palette.setColor(QPalette::Text, Qt::black);
+        ctx.palette.setColor(QPalette::Text, theme_.previewText);
+        ctx.palette.setColor(QPalette::Base, theme_.previewBg);
         ctx.clip = painter->clipBoundingRect();
         document_->documentLayout()->draw(painter, ctx);
     }

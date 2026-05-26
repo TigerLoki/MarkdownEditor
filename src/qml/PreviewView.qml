@@ -3,21 +3,28 @@ import QtQuick.Controls.Basic
 import MarkdownEditor
 
 Item {
-    property string markdownContent: ""
-
-    Flickable {
-        id: flickable
+    Rectangle {
         anchors.fill: parent
-        contentWidth: parent.width
-        contentHeight: preview.contentHeight
-        clip: true
-        boundsBehavior: Flickable.StopAtBounds
+        color: "transparent"
+        border.color: appSettings.previewBorder
+        border.width: 1
+        radius: 4
 
-        MarkdownPreview {
-            id: preview
-            width: flickable.width
-            height: Math.max(contentHeight, flickable.height)
-            markdown: markdownContent
+        Flickable {
+            id: flickable
+            anchors.fill: parent
+            contentWidth: parent.width - 16
+            contentHeight: preview.contentHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+
+            MarkdownPreview {
+                id: preview
+                width: flickable.width
+                height: Math.max(contentHeight, flickable.height)
+                markdown: editorVM.text
+                theme: appSettings.currentTheme
+            }
         }
     }
 }

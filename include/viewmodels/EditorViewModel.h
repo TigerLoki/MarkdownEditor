@@ -27,13 +27,19 @@ public slots:
     void exportHtml(QString const &path);
     void setText(QString const &text);
 
+    Q_INVOKABLE void applyFormatting(int selectionStart, int selectionEnd, const QString &prefix, const QString &suffix);
+    Q_INVOKABLE void applyLinePrefix(int cursorPosition, const QString &prefix);
+
 signals:
     void textChanged();
     void titleChanged();
     void isDirtyChanged();
+    void darkThemeChanged();
+    void cursorPositionChanged(int newPos);
     void errorOccurred(QString const &message);
 
 private:
-    Document    document_;
+    Document document_;
     FileManager fileManager_;
+    bool darkTheme_ = false;
 };

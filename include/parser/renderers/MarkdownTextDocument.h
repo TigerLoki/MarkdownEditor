@@ -15,8 +15,8 @@ public:
 protected:
     QVariant loadResource(int type, const QUrl &url) override;
 
-    signals:
-        void resourceLoaded();
+signals:
+    void resourceLoaded();
 
 private slots:
     void onReplyFinished();

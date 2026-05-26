@@ -7,8 +7,7 @@ EditorViewModel::EditorViewModel(QObject *parent)
     , document_()
     , fileManager_(document_)
 {
-    connect(&fileManager_, &FileManager::errorOccurred,
-        this,          &EditorViewModel::errorOccurred);
+    connect(&fileManager_, &FileManager::errorOccurred, this, &EditorViewModel::errorOccurred);
 }
 
 QString EditorViewModel::text() const {
@@ -63,4 +62,47 @@ void EditorViewModel::saveFileAs(QString const &path) {
 void EditorViewModel::exportHtml(QString const &path) {
     HtmlExporter exporter;
     fileManager_.exportHtml(path);
+}
+
+void EditorViewModel::applyFormatting(int const selectionStart, int const selectionEnd, QString const &prefix, QString const &suffix)
+{
+    QString const currentText = document_.text();
+    int const start = qBound(0, selectionStart, currentText.size());
+    int const end = qBound(start, selectionEnd, currentText.size());
+    bool const hasSelection = (start != end);
+
+    QString newText;
+    int newCursorPos = -1;
+
+    if (hasSelection) {
+        QString const selected = currentText.mid(start, end - start);
+        newText = currentText.left(start) + prefix + selected + suffix + currentText.mid(end);
+        newCursorPos = start + prefix.length() + selected.length() + suffix.length();
+    } else {
+        newText = currentText.left(start) + prefix + suffix + currentText.mid(end);
+        newCursorPos = start + prefix.length();
+    }
+
+    if (newText != currentText) {
+        document_.setText(newText);
+        emit textChanged();
+        emit isDirtyChanged();
+        emit cursorPositionChanged(newCursorPos);
+    }
+}
+
+void EditorViewModel::applyLinePrefix(int const cursorPosition, QString const &prefix)
+{
+    QString const text = document_.text();
+
+    int lineStart = cursorPosition;
+    while (lineStart > 0 && text[lineStart - 1] != '\n')
+        --lineStart;
+
+    QString const newText = text.left(lineStart) + prefix + text.mid(lineStart);
+    document_.setText(newText);
+    emit textChanged();
+    emit isDirtyChanged();
+
+    emit cursorPositionChanged(cursorPosition + prefix.length());
 }
