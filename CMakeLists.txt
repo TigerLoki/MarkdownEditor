@@ -54,6 +54,9 @@ qt_add_executable(appMarkdownEditor
         include/parser/renderers/MarkdownPreviewItem.h
         src/parser/renderers/MarkdownTextDocument.cpp
         include/parser/renderers/MarkdownTextDocument.h
+        src/core/AppSettings.cpp
+        include/core/AppSettings.h
+        include/parser/renderers/ThemeColors.h
 )
 
 qt_add_qml_module(appMarkdownEditor

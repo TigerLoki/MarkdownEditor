@@ -1,0 +1,29 @@
+{
+  "darkTheme": false,
+  "theme": {
+    "light": {
+      "editorBg": "#ffffff",
+      "editorText": "#111111",
+      "editorSelection": "#cce5ff",
+      "editorSelectionText": "#000000",
+      "editorBorder": "#dddddd",
+      "lineNumbersBg": "#f5f5f5",
+      "lineNumbersText": "#666666",
+      "previewBg": "#ffffff",
+      "previewText": "#111111",
+      "previewBorder": "#dddddd"
+    },
+    "dark": {
+      "editorBg": "#1e1e1e",
+      "editorText": "#d4d4d4",
+      "editorSelection": "#3a6ea5",
+      "editorSelectionText": "#ffffff",
+      "editorBorder": "#444444",
+      "lineNumbersBg": "#2d2d2d",
+      "lineNumbersText": "#999999",
+      "previewBg": "#1e1e1e",
+      "previewText": "#d4d4d4",
+      "previewBorder": "#444444"
+    }
+  }
+}
