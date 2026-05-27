@@ -82,7 +82,7 @@ ApplicationWindow {
             title: "File"
             Action { text: "New"; shortcut: "Ctrl+N"; onTriggered: editorVM.newFile() }
             Action { text: "Open..."; shortcut: "Ctrl+O"; onTriggered: openDialog.open() }
-            Action { text: "Save"; shortcut: "Ctrl+S"; onTriggered: editorVM.saveFile() }
+            Action { text: "Save"; shortcut: "Ctrl+S"; onTriggered: editorVM.filePath === "" ? saveDialog.open() : editorVM.saveFile() }
             Action { text: "Save As..."; shortcut: "Ctrl+Shift+S"; onTriggered: saveDialog.open() }
             MenuSeparator { }
             Action { text: "Export HTML..."; shortcut: "Ctrl+E"; onTriggered: exportDialog.open() }
@@ -146,7 +146,7 @@ ApplicationWindow {
                 implicitHeight: appSettings.fontSize * 1.2 + 20
                 focusPolicy: Qt.NoFocus
                 text: "💾"
-                onClicked: editorVM.saveFile()
+                onClicked: editorVM.filePath === "" ? saveDialog.open() : editorVM.saveFile()
             }
             ToolSeparator { }
             ToolButton {
