@@ -1,4 +1,5 @@
 #include <QQmlApplicationEngine>
+#include <QQuickWindow>
 #include <QIcon>
 #include <QQmlContext>
 #include <QQuickStyle>
@@ -10,6 +11,7 @@
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/app/icons/icon.png"));
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::Software);
 
     QQuickStyle::setStyle("Fusion");
     qRegisterMetaType<ThemeColors>("ThemeColors");
