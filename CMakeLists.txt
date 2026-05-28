@@ -65,6 +65,7 @@ qt_add_qml_module(appMarkdownEditor
         src/qml/Main.qml
         src/qml/EditorView.qml
         src/qml/PreviewView.qml
+        src/qml/IconToolButton.qml
 )
 
 set_target_properties(appMarkdownEditor PROPERTIES
